@@ -1,145 +1,147 @@
-# Đóng gói thành app cài được trên Android
+# 안드로이드에 설치할 수 있는 앱으로 만들기
 
-## Tại sao cách hiện tại không cài được
+> 🇰🇷 **한국어** · 🇻🇳 [Tiếng Việt](ANDROID.vi.md)
 
-Bạn đang mở app bằng `http://192.168.123.128:5178`. Tôi đã kiểm tra chính địa chỉ đó:
+## 지금 방식으로는 왜 설치가 안 되는가
+
+현재 `http://192.168.123.128:5178` 주소로 앱을 열고 계십니다. 그 주소를 직접 확인해 봤습니다:
 
 | | `http://localhost:5178` | `http://192.168.123.128:5178` |
 |---|---|---|
-| Secure context | ✅ true | ❌ **false** |
-| Service worker | ✅ có | ❌ **API không tồn tại** |
-| Cài được app | ✅ | ❌ |
+| 보안 컨텍스트 | ✅ true | ❌ **false** |
+| 서비스 워커 | ✅ 있음 | ❌ **API 자체가 없음** |
+| 앱 설치 | ✅ | ❌ |
 
-Android chỉ cho cài app web (PWA) khi trang chạy trên **HTTPS** hoặc `localhost`. Địa chỉ
-IP nội bộ chạy `http` thì trình duyệt **chặn service worker** — mà không có service worker
-thì Chrome không hiện nút "Cài đặt ứng dụng". Đây là quy định bảo mật của trình duyệt,
-không phải lỗi cấu hình, và không thể lách bằng cách chỉnh app.
+안드로이드는 페이지가 **HTTPS** 또는 `localhost` 에서 열릴 때만 웹앱(PWA) 설치를 허용합니다.
+내부 IP 를 `http` 로 열면 브라우저가 **서비스 워커를 막고**, 서비스 워커가 없으면 Chrome 이
+"앱 설치" 버튼을 보여 주지 않습니다. 브라우저의 보안 규칙이지 설정 실수가 아니며, 앱 쪽을
+고쳐서 우회할 수 없습니다.
 
-Vậy có **2 đường**. Tôi đã chuẩn bị sẵn cả hai.
+그래서 **길이 두 가지**입니다. 둘 다 준비해 두었습니다.
 
 ---
 
-## Cách 1 — Đưa lên hosting miễn phí rồi cài như app (dễ nhất, 5 phút)
+## 방법 1 — 무료 호스팅에 올리고 앱처럼 설치 (가장 쉬움, 5분)
 
-Phù hợp nếu bạn chấp nhận cần mạng lúc mở app lần đầu.
+처음 열 때 인터넷이 필요해도 괜찮다면 이 방법입니다.
 
-App này **không có server, không có database** — toàn bộ dữ liệu nằm trong máy người dùng.
-Nên chỉ cần đưa thư mục `dist/` lên bất kỳ hosting tĩnh nào là xong.
+이 앱은 **서버도 데이터베이스도 없습니다** — 모든 데이터가 사용자 기기 안에 있습니다.
+그래서 `dist/` 폴더를 아무 정적 호스팅에나 올리면 끝입니다.
 
-### Bước 1 — Build
+### 1단계 — 빌드
 
 ```bash
 npm run build
 ```
 
-Kết quả nằm trong thư mục `dist/`.
+결과물은 `dist/` 폴더에 생깁니다.
 
-### Bước 2 — Kéo thả lên Netlify
+### 2단계 — Netlify 에 끌어다 놓기
 
-1. Mở https://app.netlify.com/drop
-2. Kéo nguyên **thư mục `dist`** thả vào trang đó
-3. Netlify trả về một địa chỉ HTTPS, ví dụ `https://taekine-abc123.netlify.app`
+1. https://app.netlify.com/drop 을 엽니다
+2. **`dist` 폴더 통째로** 그 페이지에 끌어다 놓습니다
+3. Netlify 가 HTTPS 주소를 줍니다. 예: `https://taekine-abc123.netlify.app`
 
-Không cần đăng ký tài khoản cho lần đầu. Muốn giữ địa chỉ cố định thì đăng ký (miễn phí).
+처음에는 회원가입이 필요 없습니다. 주소를 고정하고 싶으면 가입하세요(무료).
 
-### Bước 3 — Cài lên điện thoại
+### 3단계 — 휴대폰에 설치
 
-1. Mở địa chỉ đó bằng **Chrome trên Android**
-2. Bấm menu `⋮` → **"앱 설치"** (Cài đặt ứng dụng) hoặc **"홈 화면에 추가"**
-3. Icon xuất hiện ngoài màn hình chính, mở lên chạy toàn màn hình như app thật
+1. 그 주소를 **안드로이드 Chrome** 으로 엽니다
+2. 메뉴 `⋮` → **"앱 설치"** 또는 **"홈 화면에 추가"**
+3. 홈 화면에 아이콘이 생기고, 열면 진짜 앱처럼 전체 화면으로 실행됩니다
 
-Sau lần đầu, service worker đã cache toàn bộ app nên **mở được cả khi mất mạng**.
+첫 실행 이후에는 서비스 워커가 앱 전체를 캐시하므로 **인터넷이 끊겨도 열립니다**.
 
-**Lưu ý:** ai có địa chỉ đó đều mở được app. Dữ liệu thì không chia sẻ (mỗi máy một kho
-riêng), nhưng nếu bạn không muốn người lạ thấy giao diện thì dùng Cách 2.
+**주의:** 주소를 아는 사람은 누구나 앱을 열 수 있습니다. 데이터는 공유되지 않지만(기기마다
+별도 재고), 낯선 사람에게 화면을 보이고 싶지 않다면 방법 2 를 쓰세요.
 
 ---
 
-## Cách 2 — Build file APK thật (hoàn toàn offline, không cần server)
+## 방법 2 — 진짜 APK 파일 빌드 (완전 오프라인, 서버 불필요)
 
-Phù hợp nếu bạn muốn app nằm hẳn trong máy, không phụ thuộc mạng và không ai khác mở được.
+앱이 기기 안에 완전히 들어가 있고, 네트워크에 의존하지 않고, 다른 사람이 열 수 없게 하려면
+이 방법입니다.
 
-Tôi đã **dựng sẵn project Android** trong thư mục `android/` bằng Capacitor. Bạn chỉ cần
-cài công cụ rồi bấm build.
+`android/` 폴더에 Capacitor 로 **안드로이드 프로젝트를 미리 만들어 두었습니다**. 도구만
+설치하고 빌드 버튼을 누르면 됩니다.
 
-### Bước 1 — Cài Android Studio
+### 1단계 — Android Studio 설치
 
-Tải tại https://developer.android.com/studio và cài đặt (khoảng 1GB, một lần duy nhất).
-Android Studio đã kèm sẵn JDK và Android SDK, không phải cài riêng.
+https://developer.android.com/studio 에서 내려받아 설치합니다(약 1GB, 한 번만).
+Android Studio 에 JDK 와 Android SDK 가 들어 있어 따로 설치할 필요가 없습니다.
 
-> Máy bạn hiện **chưa có** Java / Android SDK / Gradle — tôi đã kiểm tra. Đây là lý do
-> tôi không thể build file APK hộ bạn ngay tại đây.
+> 현재 PC 에는 Java / Android SDK / Gradle 이 **없습니다** — 확인해 봤습니다. 그래서
+> 여기서 바로 APK 를 만들어 드릴 수 없었습니다.
 
-### Bước 2 — Mở project
+### 2단계 — 프로젝트 열기
 
 ```bash
 npm run android:sync
 npm run android:open
 ```
 
-- `android:sync` = build lại web rồi copy vào project Android
-- `android:open` = mở project bằng Android Studio
+- `android:sync` = 웹을 다시 빌드해 안드로이드 프로젝트로 복사
+- `android:open` = Android Studio 로 프로젝트 열기
 
-Lần đầu Android Studio sẽ tự tải Gradle và các thư viện (khoảng 5–10 phút, cần mạng).
+처음 열면 Android Studio 가 Gradle 과 라이브러리를 자동으로 내려받습니다(5~10분, 인터넷 필요).
 
-### Bước 3 — Build APK
+### 3단계 — APK 빌드
 
-Trong Android Studio: menu **Build → Build Bundle(s) / APK(s) → Build APK(s)**
+Android Studio 메뉴: **Build → Build Bundle(s) / APK(s) → Build APK(s)**
 
-File APK nằm ở:
+APK 파일 위치:
 
 ```
 android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### Bước 4 — Cài lên điện thoại
+### 4단계 — 휴대폰에 설치
 
-1. Copy file APK sang điện thoại (USB, KakaoTalk gửi cho chính mình, Google Drive...)
-2. Mở file trên điện thoại
-3. Android hỏi cho phép cài từ nguồn không xác định → đồng ý
-4. Cài xong, app nằm ngoài màn hình chính
+1. APK 파일을 휴대폰으로 옮깁니다(USB, 카카오톡 나에게 보내기, Google Drive 등)
+2. 휴대폰에서 파일을 엽니다
+3. 안드로이드가 출처를 알 수 없는 앱 설치 허용을 물으면 → 허용
+4. 설치되면 홈 화면에 앱이 나타납니다
 
-**Bản debug APK đủ dùng nội bộ trong quán.** Chỉ khi nào muốn đưa lên Google Play mới cần
-ký release và tạo keystore.
+**debug APK 로 매장 내부용은 충분합니다.** Google Play 에 올릴 때만 release 서명과 keystore 가
+필요합니다.
 
-### Mỗi lần sửa code
+### 코드를 고칠 때마다
 
 ```bash
 npm run android:sync
 ```
 
-rồi build lại trong Android Studio.
+그다음 Android Studio 에서 다시 빌드합니다.
 
 ---
 
-## Nên chọn cách nào
+## 어느 쪽을 고를까
 
-| | Cách 1 (PWA) | Cách 2 (APK) |
+| | 방법 1 (PWA) | 방법 2 (APK) |
 |---|---|---|
-| Thời gian chuẩn bị | ~5 phút | ~1 giờ lần đầu |
-| Cần cài gì | Không | Android Studio |
-| Cần mạng | Lần đầu | Không bao giờ |
-| Cần bật máy tính | Không | Không |
-| Người lạ mở được | Có (nếu biết link) | Không |
-| Cập nhật app | Tự động | Phải build và cài lại |
+| 준비 시간 | 약 5분 | 처음 약 1시간 |
+| 설치할 것 | 없음 | Android Studio |
+| 인터넷 필요 | 처음 한 번 | 전혀 없음 |
+| PC 를 켜 둬야 하나 | 아니요 | 아니요 |
+| 낯선 사람이 열 수 있나 | 예(링크를 알면) | 아니요 |
+| 앱 업데이트 | 자동 | 다시 빌드·설치 |
 
-**Gợi ý:** dùng **Cách 1 trước** để chạy thử ngay trong quán. Nếu thấy ổn và muốn app
-gọn gàng, không phụ thuộc mạng thì làm Cách 2 sau. Hai cách không xung đột nhau.
+**권장:** **방법 1 을 먼저** 써서 매장에서 바로 테스트하세요. 괜찮다 싶고 네트워크에 의존하지
+않는 깔끔한 앱이 필요해지면 그때 방법 2 를 하면 됩니다. 두 방법은 서로 충돌하지 않습니다.
 
 ---
 
-## Điều quan trọng cần biết trước khi triển khai
+## 배포 전에 꼭 알아야 할 것
 
-**Dữ liệu nằm riêng trên từng máy.** App lưu vào `localStorage` của chính thiết bị đó.
-Nghĩa là điện thoại của bạn và điện thoại nhân viên sẽ có **hai kho hàng khác nhau**,
-không tự đồng bộ.
+**데이터는 기기마다 따로 저장됩니다.** 앱은 그 기기의 `localStorage` 에 저장합니다.
+즉 사장님 휴대폰과 직원 휴대폰은 **서로 다른 재고**를 갖고 자동으로 맞춰지지 않습니다.
 
-Với quán chỉ một người quản lý kho thì không sao. Nhưng nếu muốn nhiều người cùng nhập
-và thấy chung một số liệu thì **phải thêm server và database** — đó là một hạng mục riêng,
-không phải chỉnh vài dòng. Khi nào cần thì báo tôi.
+재고를 한 사람이 관리하는 매장이라면 문제없습니다. 하지만 여러 명이 같이 입력하고 같은
+숫자를 봐야 한다면 **서버와 데이터베이스를 추가해야 합니다** — 몇 줄 고치는 일이 아니라
+별도 작업입니다. 필요해지면 말씀해 주세요.
 
-Trong lúc chưa có server, hãy dùng `설정 → 데이터 관리 → 백업 파일 내려받기` định kỳ để
-tránh mất dữ liệu khi đổi máy hoặc xoá dữ liệu trình duyệt.
+서버가 없는 동안에는 기기를 바꾸거나 브라우저 데이터를 지울 때 잃어버리지 않도록
+`설정 → 데이터 관리 → 백업 파일 내려받기` 를 주기적으로 하세요.
 
-**API key của Claude** cũng lưu trên từng máy. Nếu cài cho nhiều nhân viên, mỗi máy phải
-nhập key riêng — hoặc chuyển sang chế độ `기기 내 인식` (Tesseract) cho máy nhân viên.
+**Claude API 키**도 기기마다 저장됩니다. 직원 여러 명에게 설치한다면 기기마다 키를 따로
+넣거나, 직원 기기는 `기기 내 인식`(Tesseract) 모드로 바꾸세요.

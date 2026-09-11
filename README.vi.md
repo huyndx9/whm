@@ -320,7 +320,7 @@ src/
 
 ## Cài lên Android
 
-Xem **[ANDROID.md](ANDROID.md)** — hướng dẫn đầy đủ 2 cách (PWA qua hosting, hoặc build
+Xem **[ANDROID.vi.md](ANDROID.vi.md)** — hướng dẫn đầy đủ 2 cách (PWA qua hosting, hoặc build
 APK bằng Capacitor). Project Android đã được dựng sẵn trong `android/`.
 
 ```bash
