@@ -1,0 +1,16 @@
+node_modules
+dist
+*.local
+
+# Android build artifacts
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/app/src/main/assets/public/
+*.keystore
+
+# local tooling
+.claude/
+dev-dist/
